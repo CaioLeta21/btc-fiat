@@ -97,6 +97,44 @@ async function fetchIMFIFS(seriesCode) {
     .sort((a, b) => a.time.localeCompare(b.time))
 }
 
+// ── BCRA (Argentina M2) — public API, no key ─────────────────────────────────
+// Variable 109 = M2 daily in millions ARS. Aggregate to monthly (end-of-month).
+async function fetchBCRA() {
+  const base = 'https://api.bcra.gob.ar/estadisticas/v4.0/monetarias/109'
+  const allDetalle = []
+  let offset = 0
+  const limit = 1000
+
+  while (true) {
+    const url = `${base}?offset=${offset}&limit=${limit}`
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } })
+    if (!res.ok) throw new Error(`BCRA ${res.status}`)
+    const j = await res.json()
+    const detalle = j.results?.[0]?.detalle || []
+    if (!detalle.length) break
+    allDetalle.push(...detalle)
+    const total = j.metadata?.resultset?.count || 0
+    offset += limit
+    if (offset >= total) break
+    await delay(200)
+  }
+
+  if (!allDetalle.length) throw new Error('BCRA: no data')
+
+  // Group by YYYY-MM, take last (most recent) value per month
+  const monthly = {}
+  for (const { fecha, valor } of allDetalle) {
+    const ym = fecha.slice(0, 7) // "YYYY-MM"
+    if (fecha >= '2010-01-01' && (!(ym in monthly) || fecha > monthly[ym].fecha)) {
+      monthly[ym] = { fecha, valor }
+    }
+  }
+
+  return Object.entries(monthly)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([ym, { valor }]) => ({ time: `${ym}-01`, value: parseFloat(valor) }))
+}
+
 // ── World Bank (annual → monthly interpolation) ───────────────────────────────
 async function fetchWorldBank(countryCode) {
   const url = `https://api.worldbank.org/v2/country/${countryCode}/indicator/FM.LBL.BMNY.CN?format=json&per_page=50&mrv=50&date=2010:2026`
@@ -188,7 +226,7 @@ async function main() {
     { code: 'JPY', label: 'BOJ API (real monthly)', fn: () => fetchBOJ('MAM1NAM2M2MO') },
     { code: 'TRY', label: 'TCMB EVDS3 (real monthly)', fn: () => fetchTCMB('TP.PBD.G02', TCMB_KEY) },
     { code: 'CNY', label: 'IMF IFS/DBnomics monthly', fn: () => fetchIMFIFS('M.CN.34____XDC') },
-    { code: 'ARS', label: 'World Bank annual',  fn: () => fetchWorldBank('AR') },
+    { code: 'ARS', label: 'BCRA API (real monthly)',  fn: () => fetchBCRA() },
   ]
 
   for (const { code, label, fn } of tasks) {
