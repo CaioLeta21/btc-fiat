@@ -11,6 +11,14 @@ export default function Header({ lang, onLangChange }: Props) {
     <header className="border-b border-[#262626] bg-[#0d0d0d]/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <a
+            href="https://letabuild.com"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#1a1a1a] border border-[#2a2a2a] text-gray-400 hover:text-white hover:border-[#444] transition-all text-xs font-medium"
+            title="Voltar para letabuild.com"
+          >
+            <span>←</span>
+            <span className="hidden sm:inline">letabuild</span>
+          </a>
           <div className="w-8 h-8 rounded-full bg-btc flex items-center justify-center text-black font-bold text-sm">
             ₿
           </div>
@@ -18,9 +26,6 @@ export default function Header({ lang, onLangChange }: Props) {
             <h1 className="text-white font-semibold text-lg leading-none">
               {t(lang, 'title')}
             </h1>
-            <p className="text-gray-500 text-xs mt-0.5 hidden sm:block">
-              letabuild.com
-            </p>
           </div>
         </div>
 
