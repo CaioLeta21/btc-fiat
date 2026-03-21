@@ -20,8 +20,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT = join(__dirname, '../public/data')
 mkdirSync(OUT, { recursive: true })
 
-const FRED_KEY = '4426e4ddbd1f412eb13b5430b04d8536'
-const TCMB_KEY = '9GrfsCOgQu'
+const FRED_KEY = process.env.FRED_API_KEY || '4426e4ddbd1f412eb13b5430b04d8536'
+const TCMB_KEY = process.env.TCMB_API_KEY || '9GrfsCOgQu'
 const delay = ms => new Promise(r => setTimeout(r, ms))
 
 // ── FRED ─────────────────────────────────────────────────────────────────────

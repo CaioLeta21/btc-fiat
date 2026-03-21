@@ -1,7 +1,5 @@
 import type { CurrencyConfig } from './types'
 
-export const FRED_API_KEY = '4426e4ddbd1f412eb13b5430b04d8536'
-
 export const CURRENCIES: CurrencyConfig[] = [
   {
     code: 'BRL',
